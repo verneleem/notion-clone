@@ -1,4 +1,23 @@
-type Page {
+type Page @auth(
+  query: { or: [
+    # NOTE: can see public Pages (no creator)
+    { rule: "query { queryPage(filter: { not: { has: creator } }) { id } }"}
+    # NOTE: can see my created Pages (creator=me)
+    { rule: "query ($email: String!) { queryPage { creator(filter: { email: { eq: $email } }) { email } } }" }
+  ]}
+  update: { or: [
+    # NOTE: can update public Pages
+    { rule: "query { queryPage(filter: { not: { has: creator } }) { id } }"}
+    # NOTE: can update my created Pages
+    { rule: "query ($email: String!) { queryPage { creator(filter: { email: { eq: $email } }) { email } } }" }
+  ]}
+  delete: { or: [
+    # NOTE: only users with isAdmin can delete public pages
+    { rule: "{ $isAdmin: { eq:\"true\" } }"}
+    # NOTE: can delete my created Pages
+    { rule: "query ($email: String!) { queryPage { creator(filter: { email: { eq: $email } }) { email } } }" }
+  ]}
+) {
   id: ID!
   blocks: [Block]
   creator: User
@@ -6,14 +25,47 @@ type Page {
   updatedAt: DateTime
 }
 
-type Block {
+type Block @auth(
+  add: { or: [
+    # NOTE: can add blocks to public pages
+    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
+    # NOTE: can add blocks to my created pages
+    { rule: "query ($email: String!) { queryBlock { page { creator(filter: { email: { eq: $email } }) { email } } } }" }
+  ]}
+  query: { or: [
+    # NOTE: can query blocks for public pages
+    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
+    # NOTE: can query blocks for my created pages
+    { rule: "query ($email: String!) { queryBlock { page { creator(filter: { email: { eq: $email } }) { email } } } }" }
+  ]}
+  update: { or: [
+    # NOTE: can update blocks on public pages
+    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
+    # NOTE: can update blocks on my created pages
+    { rule: "query ($email: String!) { queryBlock { page { creator(filter: { email: { eq: $email } }) { email } } } }" }
+  ]}
+  delete: { or: [
+    # NOTE: can delete blocks on public pages
+    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
+    # NOTE: can delete blocks on my created pages
+    { rule: "query ($email: String!) { queryBlock { page { creator(filter: { email: { eq: $email } }) { email } } } }" }
+  ]}
+) {
   id: ID!
   type: String!
   html: String
   imageUrl: String
+  page: Page! @hasInverse(field: blocks)
 }
 
-type User {
+type User @auth(
+  # NOTE: can only see own user
+  query: { rule: "query ($email: String!) { queryUser(filter: { email: { eq: $email } }) { email } }" }
+  # NOTE: can only update own user
+  update: { rule: "query ($email: String!) { queryUser(filter: { email: { eq: $email } }) { email } }" }
+  # NOTE: only user with isAdmin can delete user
+  delete: { rule: "{ $isAdmin: { eq:\"true\" } }"}
+) {
   email: String! @id
   name: String!
   pages: [Page] @hasInverse(field: creator)
