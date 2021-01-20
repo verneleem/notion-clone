@@ -52,7 +52,7 @@ type Block @auth(
   ]}
 ) {
   id: ID!
-  type: String!
+  tag: String!
   html: String
   imageUrl: String
   page: Page! @hasInverse(field: blocks)
