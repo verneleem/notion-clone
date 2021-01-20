@@ -1,0 +1,27 @@
+type Page {
+  id: ID!
+  blocks: [Block]
+  creator: User
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type Block {
+  id: ID!
+  type: String!
+  html: String
+  imageUrl: String
+}
+
+type User {
+  email: String! @id
+  password: String!
+  name: String!
+  active: Boolean!
+  activationToken: String
+  resetToken: String
+  resetTokenExpiry: Number
+  pages: [Page] @hasInverse(field: creator)
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
