@@ -1,0 +1,67 @@
+fragment BlockInfo on Block {
+  id
+  tag
+  html
+  imageUrl
+}
+
+fragment UserInfo on User {
+  email
+  name
+}
+
+fragment PageInfo on Page {
+  id
+  blocks {
+    ...BlockInfo
+  }
+  creator {
+    ...UserInfo
+  }
+  createdAt
+  updatedAt
+}
+
+query getPages {
+  queryPage {
+    ...PageInfo
+  }
+}
+
+query getPage($pageID: ID!) {
+  getPage(id: $pageID) {
+    ...PageInfo
+  }
+}
+
+mutation addPage($page: AddPageInput!) {
+  addPage(input: [$page]) {
+    page {
+      ...PageInfo
+    }
+  }
+}
+
+mutation updatePage($updatePage: UpdatePageInput!) {
+  updatePage($updatePageInput) {
+    page {
+      ...PageInfo
+    }
+  }
+}
+
+mutation deletePage($pageID: ID!) {
+  deletePage(filter: {id: [$pageID]}) {
+    page {
+      id
+    }
+  }
+}
+
+mutation updateUser($email: String, $name: String!, $timestamp: DateTime!) {
+  updateUser(filter:{email: {eq: $email}}, set: {name: $name}) {
+    email
+    name
+    updatedAt
+  }
+}
