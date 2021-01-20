@@ -15,12 +15,7 @@ type Block {
 
 type User {
   email: String! @id
-  password: String!
   name: String!
-  active: Boolean!
-  activationToken: String
-  resetToken: String
-  resetTokenExpiry: Number
   pages: [Page] @hasInverse(field: creator)
   createdAt: DateTime!
   updatedAt: DateTime
