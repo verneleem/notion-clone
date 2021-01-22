@@ -1,8 +1,7 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-
-import { UserStateContext } from "../../context/UserContext";
+import { useAuth0 } from "@auth0/auth0-react"
 
 import Button from "../button";
 import ContextMenu from "../contextMenu";
@@ -11,12 +10,15 @@ import GithubIcon from "../../images/github.svg";
 import UserIcon from "../../images/user.svg";
 
 const Layout = ({ children }) => {
+  const { loginWithPopup, isAuthenticated: isAuth, logout, user } = useAuth0();
+  const loginClickHandler = (event) => {
+    event.preventDefault();
+    loginWithPopup();
+  }
   const router = useRouter();
-  const state = useContext(UserStateContext);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   const isLoginPage = router.pathname === "/login";
-  const isAuth = state.isAuth;
 
   const toggleContextMenu = () => {
     setIsContextMenuOpen(!isContextMenuOpen);
@@ -45,7 +47,7 @@ const Layout = ({ children }) => {
           </a>
         </div>
         <nav className={styles.nav}>
-          {!isLoginPage && !isAuth && <Button href="/login">Login</Button>}
+          {!isLoginPage && !isAuth && <Button href="#" onClickHandler={loginClickHandler}>Login</Button>}
           {!isLoginPage && isAuth && (
             <div className={styles.user}>
               <span
@@ -53,7 +55,7 @@ const Layout = ({ children }) => {
                 tabIndex="0"
                 onClick={() => toggleContextMenu()}
               >
-                <img src={UserIcon} alt="User Icon" />
+                <img src={user.picture ? user.picture : UserIcon} alt="User Icon" />
               </span>
             </div>
           )}
@@ -66,14 +68,9 @@ const Layout = ({ children }) => {
                   action: () => handleNavigation("/pages"),
                 },
                 {
-                  id: "account",
-                  label: "Account",
-                  action: () => handleNavigation("/account"),
-                },
-                {
                   id: "logout",
                   label: "Logout",
-                  action: () => handleNavigation("/logout"),
+                  action: () => logout(),
                 },
               ]}
               closeAction={() => closeContextMenu()}

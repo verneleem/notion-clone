@@ -14,6 +14,7 @@ const Notice = ({ children, status, mini, dismissible, style }) => {
         isVisible !== true ? styles.notDisplayed : null,
         status === "SUCCESS" ? styles.successNotice : null,
         status === "ERROR" ? styles.errorNotice : null,
+        status === "INFO" ? styles.infoNotice: null,
         mini ? styles.miniNotice : null,
       ].join(" ")}
     >

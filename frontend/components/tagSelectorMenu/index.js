@@ -25,11 +25,11 @@ const allowedTags = [
     tag: "p",
     label: "Paragraph",
   },
-  {
-    id: "image",
-    tag: "img",
-    label: "Image",
-  },
+  // {
+  //   id: "image",
+  //   tag: "img",
+  //   label: "Image",
+  // },
 ];
 
 const TagSelectorMenu = ({ position, closeMenu, handleSelection }) => {

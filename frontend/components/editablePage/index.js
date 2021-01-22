@@ -6,22 +6,21 @@ import EditableBlock from "../editableBlock";
 import Notice from "../notice";
 import { usePrevious } from "../../hooks";
 import { objectId, setCaretToEnd } from "../../utils";
+import { useUpdatePageMutation } from "../../lib/operations/types/operations";
 
 // A page is represented by an array containing several blocks
 // [
 //   {
-//     _id: "5f54d75b114c6d176d7e9765",
 //     html: "Heading",
 //     tag: "h1",
 //     imageUrl: "",
 //   },
 //   {
-//     _id: "5f54d75b114c6d176d7e9766",
 //     html: "I am a <strong>paragraph</strong>",
 //     tag: "p",
 //     imageUrl: "",
 //   },
-//     _id: "5f54d75b114c6d176d7e9767",
+//   {
 //     html: "/im",
 //     tag: "img",
 //     imageUrl: "images/test.png",
@@ -40,28 +39,25 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
 
   const router = useRouter();
   const [blocks, setBlocks] = useState(fetchedBlocks);
+  // useEffect(()=>{
+  //   setBlocks(fetchedBlocks)
+  // },[fetchedBlocks])
   const [currentBlockId, setCurrentBlockId] = useState(null);
-
   const prevBlocks = usePrevious(blocks);
+  const [updatePage] = useUpdatePageMutation();
 
   // Update the database whenever blocks change
   useEffect(() => {
-    const updatePageOnServer = async (blocks) => {
-      try {
-        await fetch(`${process.env.NEXT_PUBLIC_API}/pages/${id}`, {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            blocks: blocks,
-          }),
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    };
     if (prevBlocks && prevBlocks !== blocks) {
-      updatePageOnServer(blocks);
+      updatePage({variables:{
+        updatePageInput: {
+          filter: { id: [id] },
+          set: {
+            blocks: JSON.stringify(blocks),
+            updatedAt: new Date()
+          }
+        }
+      }})
     }
   }, [blocks, prevBlocks]);
 
@@ -70,7 +66,7 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
     // If a new block was added, move the caret to it
     if (prevBlocks && prevBlocks.length + 1 === blocks.length) {
       const nextBlockPosition =
-        blocks.map((b) => b._id).indexOf(currentBlockId) + 1 + 1;
+        blocks.map((b) => b.id).indexOf(currentBlockId) + 1 + 1;
       const nextBlock = document.querySelector(
         `[data-position="${nextBlockPosition}"]`
       );
@@ -81,7 +77,7 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
     // If a block was deleted, move the caret to the end of the last block
     if (prevBlocks && prevBlocks.length - 1 === blocks.length) {
       const lastBlockPosition = prevBlocks
-        .map((b) => b._id)
+        .map((b) => b.id)
         .indexOf(currentBlockId);
       const lastBlock = document.querySelector(
         `[data-position="${lastBlockPosition}"]`
@@ -113,7 +109,7 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
   };
 
   const updateBlockHandler = (currentBlock) => {
-    const index = blocks.map((b) => b._id).indexOf(currentBlock.id);
+    const index = blocks.map((b) => b.id).indexOf(currentBlock.id);
     const oldBlock = blocks[index];
     const updatedBlocks = [...blocks];
     updatedBlocks[index] = {
@@ -132,9 +128,9 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
 
   const addBlockHandler = (currentBlock) => {
     setCurrentBlockId(currentBlock.id);
-    const index = blocks.map((b) => b._id).indexOf(currentBlock.id);
+    const index = blocks.map((b) => b.id).indexOf(currentBlock.id);
     const updatedBlocks = [...blocks];
-    const newBlock = { _id: objectId(), tag: "p", html: "", imageUrl: "" };
+    const newBlock = { id: objectId(), tag: "p" };
     updatedBlocks.splice(index + 1, 0, newBlock);
     updatedBlocks[index] = {
       ...updatedBlocks[index],
@@ -148,7 +144,7 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
   const deleteBlockHandler = (currentBlock) => {
     if (blocks.length > 1) {
       setCurrentBlockId(currentBlock.id);
-      const index = blocks.map((b) => b._id).indexOf(currentBlock.id);
+      const index = blocks.map((b) => b.id).indexOf(currentBlock.id);
       const deletedBlock = blocks[index];
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(index, 1);
@@ -182,7 +178,6 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
       {isNewPublicPage && (
         <Notice dismissible>
           <h4>Hey 👋 You just created a public page.</h4>
-          <p>It will be automatically deleted after 24 hours.</p>
         </Notice>
       )}
       <DragDropContext onDragEnd={onDragEndHandler}>
@@ -191,15 +186,15 @@ const EditablePage = ({ id, fetchedBlocks, err }) => {
             <div ref={provided.innerRef} {...provided.droppableProps}>
               {blocks.map((block) => {
                 const position =
-                  blocks.map((b) => b._id).indexOf(block._id) + 1;
+                  blocks.map((b) => b.id).indexOf(block.id) + 1;
                 return (
                   <EditableBlock
-                    key={block._id}
+                    key={block.id}
                     position={position}
-                    id={block._id}
+                    id={block.id}
                     tag={block.tag}
-                    html={block.html}
-                    imageUrl={block.imageUrl}
+                    html={block.html || ""}
+                    imageUrl={block.imageUrl || ""}
                     pageId={id}
                     addBlock={addBlockHandler}
                     deleteBlock={deleteBlockHandler}

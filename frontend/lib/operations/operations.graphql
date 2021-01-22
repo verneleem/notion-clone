@@ -1,10 +1,3 @@
-fragment BlockInfo on Block {
-  id
-  tag
-  html
-  imageUrl
-}
-
 fragment UserInfo on User {
   email
   name
@@ -12,9 +5,7 @@ fragment UserInfo on User {
 
 fragment PageInfo on Page {
   id
-  blocks {
-    ...BlockInfo
-  }
+  blocks
   creator {
     ...UserInfo
   }
@@ -23,7 +14,7 @@ fragment PageInfo on Page {
 }
 
 query getPages {
-  queryPage {
+  queryPage(filter: { has: creator } order:{ desc: createdAt }) {
     ...PageInfo
   }
 }
@@ -42,8 +33,8 @@ mutation addPage($page: AddPageInput!) {
   }
 }
 
-mutation updatePage($updatePage: UpdatePageInput!) {
-  updatePage($updatePageInput) {
+mutation updatePage($updatePageInput: UpdatePageInput!) {
+  updatePage(input: $updatePageInput) {
     page {
       ...PageInfo
     }
@@ -59,9 +50,11 @@ mutation deletePage($pageID: ID!) {
 }
 
 mutation updateUser($email: String, $name: String!, $timestamp: DateTime!) {
-  updateUser(filter:{email: {eq: $email}}, set: {name: $name}) {
-    email
-    name
-    updatedAt
+  updateUser(input: {filter:{email: {eq: $email}}, set: {name: $name}}) {
+    user {
+      email
+      name
+      updatedAt
+    }
   }
 }

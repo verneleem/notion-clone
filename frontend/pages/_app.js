@@ -1,5 +1,6 @@
 import App from "next/app";
-import cookies from "next-cookies";
+import { ApolloProvider } from "@apollo/client"
+import { Auth0Provider, useAuth0 } from "@auth0/auth0-react"
 
 import UserProvider from "../context/UserContext";
 import Layout from "../components/layout";
@@ -7,31 +8,43 @@ import Layout from "../components/layout";
 import "typeface-nunito-sans";
 import "typeface-roboto";
 import "../shared/global.scss";
+import { useApollo } from "../lib/apolloClient";
 
-const MyApp = ({ Component, pageProps, isAuthenticated }) => {
+const MyApp = ({ Component, pageProps }) => {
+  const { isAuthenticated, getIdTokenClaims } = useAuth0()
+  const apolloClient = useApollo(pageProps.initialApolloState, isAuthenticated ? getIdTokenClaims : null);
   return (
     <UserProvider isAuthenticated={isAuthenticated}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <ApolloProvider client={apolloClient}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </ApolloProvider>
     </UserProvider>
   );
 };
 
-MyApp.getInitialProps = async (context) => {
-  let isAuthenticated = false;
+const AuthLoadingWrapper = (props) => {
+  const { isLoading } = useAuth0()
+  if (isLoading) return <></>
+  return <MyApp {...props} />
+}
 
-  // WARNING - We only check if a cookie called token is present
-  // We do not verify the token on the server at this point
-  // In this case, it might be fine since we only need the auth state
-  // for UI purposes. Any sensitive data fetch is secured separately
-  const { token } = cookies(context.ctx);
-  if (token) {
-    isAuthenticated = true;
-  }
+const Auth0Wrapper = (props) => {
+  return (
+    <Auth0Provider
+      domain="dev-93kebfjs.us.auth0.com"
+      clientId="eaNlZ3Hi019Ty8kfJ1cZ8iL4abmpZP24"
+      cacheLocation="localstorage"
+    >
+      <AuthLoadingWrapper {...props} />
+    </Auth0Provider>
+  )
+}
 
+Auth0Wrapper.getInitialProps = async (context) => {
   const appProps = await App.getInitialProps(context);
-  return { ...appProps, isAuthenticated };
+  return { ...appProps };
 };
 
-export default MyApp;
+export default Auth0Wrapper;

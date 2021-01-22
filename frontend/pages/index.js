@@ -1,40 +1,51 @@
 import EditablePage from "../components/editablePage";
+import { useAddPageMutation } from "../lib/operations/types/operations"
+import { useAuth0 } from "@auth0/auth0-react"
+import { useMemo, useEffect } from "react";
 
 // If a user hits "/", we create a blank page and redirect to that page
 // so that each user gets his/her personal space to test things
 
 const IndexPage = ({ pid, blocks, err }) => {
-  return <EditablePage id={pid} fetchedBlocks={blocks} err={err} />;
+  const auth0 = useAuth0();
+  const { user, isAuthenticated, getIdTokenClaims } = auth0;
+  const [addPage, { data, error, called }] = useAddPageMutation()
+  useEffect(()=>{
+    if (!pid && !called) {
+      addPage({
+        variables: {
+          page: {
+            blocks: JSON.stringify(blocks),
+            creator: isAuthenticated ? {
+              email: user.email,
+              name: user.name ? user.name : user.email,
+              createdAt: new Date()
+            } : null,
+            createdAt: new Date()
+          }
+        }
+      });
+    }
+  },[pid, called, isAuthenticated]);
+  if (data?.addPage?.page?.[0]?.id) {
+    const creator = data.addPage.page[0].creator
+    const query = !creator ? "?public=true" : ""
+    window.location.href = `/p/${data.addPage.page[0].id}${query}`;
+  }
+  const hasError = useMemo(()=>{
+    if (err) return true
+    if (error) {
+      console.error(error)
+      return true
+    }
+    return false
+  },[err,error])
+  return <EditablePage id={pid} fetchedBlocks={blocks} err={hasError} />;
 };
 
 export const getServerSideProps = async (context) => {
-  const blocks = [{ tag: "p", html: "", imageUrl: "" }];
-  const res = context.res;
-  const req = context.req;
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API}/pages`, {
-      method: "POST",
-      credentials: "include",
-      // Forward the authentication cookie to the backend
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: req ? req.headers.cookie : undefined,
-      },
-      body: JSON.stringify({
-        blocks: blocks,
-      }),
-    });
-    const data = await response.json();
-    const pageId = data.pageId;
-    const creator = data.creator;
-    const query = !creator ? "?public=true" : ""; // needed to show notice
-    res.writeHead(302, { Location: `/p/${pageId}${query}` });
-    res.end();
-    return { props: {} };
-  } catch (err) {
-    console.log(err);
-    return { props: { blocks: null, pid: null, err: true } };
-  }
+  const blocks = [{ id: 0, tag: "p" }];
+  return { props: { blocks: blocks, pid: null, err: false } };
 };
 
 export default IndexPage;
