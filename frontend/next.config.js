@@ -4,4 +4,5 @@ module.exports = withImages({
   env: {
     NEXT_PUBLIC_API: process.env.NEXT_PUBLIC_API,
   },
+  target: "serverless",
 });
