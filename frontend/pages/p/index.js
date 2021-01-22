@@ -8,7 +8,8 @@ import Notice from "../../components/notice";
 const Page = () => {
   let pid = null
   if (typeof window !== "undefined") {
-    pid = window.location.pathname.split('/')[2];
+    const urlParams = new URLSearchParams(window.location.search);
+    pid = urlParams.get('pid');
   }
   const defBlocks = [{id: 0, tag: "p"}]
   const [getPage,{data,loading,error,called}] = useGetPageLazyQuery();

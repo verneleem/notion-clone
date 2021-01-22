@@ -31,8 +31,8 @@ const IndexPage = () => {
   },[pid, called, isAuthenticated]);
   if (data?.addPage?.page?.[0]?.id) {
     const creator = data.addPage.page[0].creator
-    const query = !creator ? "?public=true" : ""
-    window.location.href = `/p/${data.addPage.page[0].id}${query}`;
+    const query = !creator ? "&public=true" : ""
+    window.location.href = `/p/?pid=${data.addPage.page[0].id}${query}`;
   }
   const hasError = useMemo(()=>{
     if (error) {

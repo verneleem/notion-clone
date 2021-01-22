@@ -33,7 +33,7 @@ const Card = ({ pageId, date, content, deleteCard }) => {
 
   // https://github.com/vercel/next.js/issues/2833#issuecomment-489292656
   const forwardToPage = (id) => {
-    router.push("/p/[pid]", `/p/${id}`);
+    router.push("/p/", `/p/?pid=${id}`);
   };
 
   const deletePage = (id) => {
@@ -51,7 +51,7 @@ const Card = ({ pageId, date, content, deleteCard }) => {
 
   return (
     <div className={styles.cardWrapper}>
-      <a href={`/p/${pageId}`}>
+      <a href={`/p/?pid=${pageId}`}>
         <article className={styles.card}>
           <div className={styles.date}>{formattedDate}</div>
           <div className={styles.content}>
