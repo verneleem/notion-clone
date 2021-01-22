@@ -15,11 +15,10 @@
   "dependencies": {
     "@apollo/client": "^3.3.7",
     "@auth0/auth0-react": "^1.2.0",
-    "canvas": "^2.6.1",
     "graphql": "^15.4.0",
-    "isomorphic-dompurify": "^0.7.0",
+    "jsdom": "^16.4.0",
     "match-sorter": "^4.2.0",
-    "next": "^9.5.5",
+    "next": "^10.0.5",
     "next-cookies": "^2.0.3",
     "next-images": "^1.4.1",
     "react": "^16.13.1",

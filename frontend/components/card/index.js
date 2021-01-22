@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-import DOMPurify from "isomorphic-dompurify";
-
 import ContextMenu from "../contextMenu";
 import styles from "./styles.module.scss";
 import MoreIcon from "../../images/more.svg";
@@ -59,7 +57,7 @@ const Card = ({ pageId, date, content, deleteCard }) => {
           <div className={styles.content}>
             {textContent.map((block, key) => {
               const HTMLTag = block.tag;
-              const html = DOMPurify.sanitize(block.html);
+              const html = block.html;
               return (
                 <HTMLTag key={key} dangerouslySetInnerHTML={{ __html: html }} />
               );
