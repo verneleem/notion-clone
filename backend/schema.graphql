@@ -19,43 +19,10 @@ type Page @auth(
   ]}
 ) {
   id: ID!
-  blocks: [Block]
+  blocks: String
   creator: User
   createdAt: DateTime!
   updatedAt: DateTime
-}
-
-type Block @auth(
-  add: { or: [
-    # NOTE: can add blocks to public pages
-    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
-    # NOTE: can add blocks to my created pages
-    { rule: "query ($username: String!) { queryBlock { page { creator(filter: { email: { eq: $username } }) { email } } } }" }
-  ]}
-  query: { or: [
-    # NOTE: can query blocks for public pages
-    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
-    # NOTE: can query blocks for my created pages
-    { rule: "query ($username: String!) { queryBlock { page { creator(filter: { email: { eq: $username } }) { email } } } }" }
-  ]}
-  update: { or: [
-    # NOTE: can update blocks on public pages
-    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
-    # NOTE: can update blocks on my created pages
-    { rule: "query ($username: String!) { queryBlock { page { creator(filter: { email: { eq: $username } }) { email } } } }" }
-  ]}
-  delete: { or: [
-    # NOTE: can delete blocks on public pages
-    { rule: "query { queryBlock { page(filter: { not: { has: creator } }) { id } } }" }
-    # NOTE: can delete blocks on my created pages
-    { rule: "query ($username: String!) { queryBlock { page { creator(filter: { email: { eq: $username } }) { email } } } }" }
-  ]}
-) {
-  id: ID!
-  tag: String!
-  html: String
-  imageUrl: String
-  page: Page! @hasInverse(field: blocks)
 }
 
 type User @auth(
@@ -68,7 +35,7 @@ type User @auth(
 ) {
   email: String! @id
   name: String!
-  pages: [Page] @hasInverse(field: creator)
+  pages: [Page] @hasInverse(field: "creator")
   createdAt: DateTime!
   updatedAt: DateTime
 }
