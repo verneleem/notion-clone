@@ -6,7 +6,9 @@ import { useMemo, useEffect } from "react";
 // If a user hits "/", we create a blank page and redirect to that page
 // so that each user gets his/her personal space to test things
 
-const IndexPage = ({ pid, blocks, err }) => {
+const IndexPage = () => {
+  const blocks = [{ id: 0, tag: "p" }];
+  let pid = null;
   const auth0 = useAuth0();
   const { user, isAuthenticated, getIdTokenClaims } = auth0;
   const [addPage, { data, error, called }] = useAddPageMutation()
@@ -33,19 +35,13 @@ const IndexPage = ({ pid, blocks, err }) => {
     window.location.href = `/p/${data.addPage.page[0].id}${query}`;
   }
   const hasError = useMemo(()=>{
-    if (err) return true
     if (error) {
       console.error(error)
       return true
     }
     return false
-  },[err,error])
+  },[error])
   return <EditablePage id={pid} fetchedBlocks={blocks} err={hasError} />;
-};
-
-export const getServerSideProps = async (context) => {
-  const blocks = [{ id: 0, tag: "p" }];
-  return { props: { blocks: blocks, pid: null, err: false } };
 };
 
 export default IndexPage;

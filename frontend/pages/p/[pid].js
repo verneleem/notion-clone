@@ -5,7 +5,11 @@ import { useGetPageLazyQuery } from "../../lib/operations/types/operations"
 import EditablePage from "../../components/editablePage/index";
 import Notice from "../../components/notice";
 
-const Page = ({ pid, err }) => {
+const Page = () => {
+  let pid = null
+  if (typeof window !== "undefined") {
+    pid = window.location.pathname.split('/')[2];
+  }
   const defBlocks = [{id: 0, tag: "p"}]
   const [getPage,{data,loading,error,called}] = useGetPageLazyQuery();
   useEffect(()=>{
@@ -29,10 +33,9 @@ const Page = ({ pid, err }) => {
     }
   },[error,data,loading,called])
   const hasError = useMemo(()=>{
-    if (err) return true
     if (error) return true
     return false
-  },[err,error])
+  },[error])
   if (loading) {
     return (
       <Notice status="INFO" dismissible={false}>
@@ -48,12 +51,6 @@ const Page = ({ pid, err }) => {
     );
   }
   return <EditablePage id={pid} fetchedBlocks={blocks} err={hasError}  />;
-};
-
-export const getServerSideProps = async (context) => {
-  resetServerContext(); // needed for drag and drop functionality
-  const pageId = context.query.pid;
-  return { props: { pid: pageId } }
 };
 
 export default Page;
