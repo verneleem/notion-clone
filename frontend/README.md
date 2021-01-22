@@ -39,6 +39,8 @@ An editable block is a contenteditable element. It receives the content and html
 
 The component essentially differentiates between text content and image content that gets passed into it. Receiving the `img` tag with an `imageUrl`, we render an image, receiving any other tag with `html`, we render a contenteditable container, respectively.
 
+**NOTE**: The backend in this repo was updated to Slash GraphQL. While Slash GraphQL provides an excellent API, it does not store documents such as images. We could have integrated with S3 or another media storage service for this process, but instead for now we simply restricted the image upload capabilities.
+
 Any other state properties are being used to keep track of user inputs and the visibility of different type of menus.
 
 ```json
