@@ -84,7 +84,7 @@ const Layout = ({ children }) => {
         <hr className={styles.hr} />
         <div className={styles.github}>
           <a
-            href="https://github.com/konstantinmuenster/notion-clone"
+            href="https://github.com/verneleem/notion-clone/tree/graphql"
             rel="noopener noreferrer"
             role="link"
             tabIndex="0"
